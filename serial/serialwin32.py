@@ -13,6 +13,7 @@ from __future__ import absolute_import
 
 # pylint: disable=invalid-name,too-few-public-methods
 import ctypes
+import msvcrt
 import time
 from serial import win32
 
@@ -30,6 +31,7 @@ class Serial(SerialBase):
         self._port_handle = None
         self._overlapped_read = None
         self._overlapped_write = None
+        self.fd = None
         super(Serial, self).__init__(*args, **kwargs)
 
     def open(self):
@@ -85,6 +87,8 @@ class Serial(SerialBase):
                 self._port_handle,
                 win32.PURGE_TXCLEAR | win32.PURGE_TXABORT |
                 win32.PURGE_RXCLEAR | win32.PURGE_RXABORT)
+            # Get a valid file handle for the port
+            self.fd = msvcrt.open_osfhandle(self._port_handle)
         except:
             try:
                 self._close()
